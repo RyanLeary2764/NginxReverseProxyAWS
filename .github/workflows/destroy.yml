@@ -1,14 +1,7 @@
 name: Destroy
 
 on:
-  workflow_dispatch:
-    inputs:
-      environment:
-        type: choice
-        description: Which environment to remove AWS resources for?
-        options:
-          - staging
-          - prod
+  workflow_dispatch:   #Allows maual trigger from Git
 
 jobs:
   terraform:
@@ -38,5 +31,5 @@ jobs:
     - name: Terraform Init
       run: terraform init
 
-    - name: Terraform Validate
-      run: terraform destroy
+    - name: Terraform Destroy
+      run: terraform destroy -auto-approve
