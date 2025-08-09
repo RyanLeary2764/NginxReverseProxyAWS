@@ -3,9 +3,9 @@ name: Terraform CI/CD
 
 on:
   push:
-    branches: [ main ]
+    branches: [ TestingBranch ]
   pull_request:
-    branches: [ main ]
+    branches: [ TestingBranch ]
 
 jobs:
   terraform:
@@ -43,4 +43,31 @@ jobs:
 
     - name: Terraform Apply
       if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-      run: terraform apply -auto-approve
+      run: |
+        terraform apply -auto-approve
+        terraform output -json > tf_output.json
+
+    - name: Save EC2 IP
+      id: save_ip
+      run: |
+        IP=$(jq -r .ec2_public_ip.value tfoutput.json)
+        echo "EC2_IP=$IP" >> $GITHUB_ENV
+
+    - name: Install Ansible
+      run: sudo apt-get update && sudo apt-get install -y ansible
+
+    - name: Generate Inventory 
+      run: |
+        echo "[ephemeral]" > inventory.ini
+        echo "$EC2_IP ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/id_rsa" >> inventory.ini
+
+    - name: Run Ansible Playbook
+      uses: dawidd6/action-ansible-playbook@v2
+      with:
+        playbook: deploy.yml
+        inventory: |
+          [web]
+          ${{env.EC2_IP}}
+      env:
+        DOCKER_TAG: ${{ENV.DOCKER_TAG}}
+
