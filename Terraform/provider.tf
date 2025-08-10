@@ -12,7 +12,7 @@ terraform {
   }
 
   backend "s3" {
-    bucket         = "level_one_bucket"
+    bucket         = "level-one-bucket"
     key            = "tf-state-setup"
     region         = "us-east-1"
     encrypt        = true
