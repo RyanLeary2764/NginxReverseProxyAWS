@@ -64,7 +64,7 @@ jobs:
     - name: Run Ansible Playbook
       uses: dawidd6/action-ansible-playbook@v2
       with:
-        playbook: deploy.yml
+        playbook: playbook.yml
         inventory: |
           [web]
           ${{env.EC2_IP}}
