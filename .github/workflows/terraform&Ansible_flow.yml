@@ -70,4 +70,6 @@ jobs:
           ${{env.EC2_IP}}
       env:
         DOCKER_TAG: ${{ENV.DOCKER_TAG}}
+        EC2_IP: ${{env.EC2_IP}}
+        
 

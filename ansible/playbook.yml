@@ -1,0 +1,8 @@
+---
+- name: Deploy application to ephemeral EC2
+  hosts: web
+  become: yes
+  vars:
+    image_tag: "{{ lookup('env', 'IMAGE_TAG') }}"  # Passed in from GitHub Actions
+  roles:
+    - deploy_app
