@@ -48,7 +48,7 @@ jobs:
       run: terraform validate
 
     - name: Terraform Plan
-      run: terraform plan
+      run: terraform plan -var="public_key${{env.PUBLIC_KEY}}"
 
     - name: Terraform Apply
       if: github.ref == 'refs/heads/TestingBranch' && github.event_name == 'push'
