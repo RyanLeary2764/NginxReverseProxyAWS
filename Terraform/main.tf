@@ -82,7 +82,7 @@ resource "aws_instance" "NginxAWS_server" {
   ami      ="ami-07d9b9ddc6cd8dd30"
   instance_type      = var.instance_type
   subnet_id      = aws_subnet.NginxAWS_public_subnet.id   
-   
+  key_name =aws_key_pair.ci_key.key_name   
 
   vpc_security_group_ids = [aws_security_group.NginxAWS_sg.id]
 
