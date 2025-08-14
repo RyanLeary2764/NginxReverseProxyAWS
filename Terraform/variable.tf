@@ -22,3 +22,8 @@ variable "contact" {
   description = "contact name for tagging resources"
   default     = "73.leary@gmail.com"
 }
+
+variable "public_key" {
+    type = string
+  
+}

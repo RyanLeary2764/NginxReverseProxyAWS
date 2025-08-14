@@ -20,6 +20,15 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v3
 
+    - name: Generate SSH key pair
+        id: ssh
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519 -q -N ""
+          chmod 600 ~/.ssh/id_ed25519
+          echo "PRIVATE_KEY_PATH=$HOME/.ssh/id_ed25519" >> $GITHUB_ENV
+          echo "PUBLIC_KEY=$(cat ~/.ssh/id_ed25519.pub)" >> $GITHUB_ENV
+
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v3
       with:
@@ -44,7 +53,7 @@ jobs:
     - name: Terraform Apply
       if: github.ref == 'refs/heads/TestingBranch' && github.event_name == 'push'
       run: |
-        terraform apply -auto-approve
+        terraform apply -auto-approve -var="public_key${{env.PUBLIC_KEY}}"
         terraform output -json > tf_output.json
 
     - name: Save EC2 IP
@@ -59,7 +68,7 @@ jobs:
     - name: Generate Inventory 
       run: |
         echo "[ephemeral]" > inventory.ini
-        echo "$EC2_IP ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/id_rsa" >> inventory.ini
+        echo "$EC2_IP ansible_user=ubuntu ansible_ssh_private_key_file=${{ env.PRIVATE_KEY_PATH}}" >> inventory.ini
 
     - name: Run Ansible Playbook
       uses: dawidd6/action-ansible-playbook@v2

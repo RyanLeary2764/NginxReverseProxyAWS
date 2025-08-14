@@ -99,3 +99,10 @@ resource "aws_eip" "NginxAWS_eip" {
   instance = aws_instance.NginxAWS_server.id
   domain      = "vpc"
 }
+
+resource "aws_key_pair" "ci_key" {
+
+key_name = "ci-cd-key-${timestamp()}"
+public_key = var.public_key
+  
+}
