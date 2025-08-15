@@ -32,4 +32,4 @@ jobs:
       run: terraform init
 
     - name: Terraform Destroy
-      run: terraform destroy -auto-approve
+      run: terraform destroy -auto-approve -var="public_key=${{env.PUBLIC_KEY}}"
