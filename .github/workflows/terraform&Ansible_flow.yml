@@ -73,7 +73,7 @@ jobs:
     - name: Run Ansible Playbook
       uses: dawidd6/action-ansible-playbook@v2
       with:
-        playbook: ../NginxReverseProxyAWS/ansible/playbook.yml
+        playbook: ../NginxReverseProxyAWS/Ansible/playbook.yml
         inventory: |
           [web]
           ${{env.EC2_IP}}
