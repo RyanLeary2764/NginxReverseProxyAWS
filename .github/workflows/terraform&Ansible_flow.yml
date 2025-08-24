@@ -73,12 +73,13 @@ jobs:
     - name: Run Ansible Playbook
       uses: dawidd6/action-ansible-playbook@v2
       with:
-        playbook: ../NginxReverseProxyAWS/Ansible/playbook.yml
+        playbook: NginxReverseProxyAWS/Ansible/playbook.yml
         inventory: |
           [web]
           ${{env.EC2_IP}}
       env:
         DOCKER_TAG: ${{ENV.DOCKER_TAG}}
+        PRIVATE_KEY_PATH: ${{env.PRIVATE_KEY_PATH}}
         EC2_IP: ${{env.EC2_IP}}
         
 
