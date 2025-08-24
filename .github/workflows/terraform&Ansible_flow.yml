@@ -56,6 +56,9 @@ jobs:
         terraform apply -auto-approve -var="public_key=${{env.PUBLIC_KEY}}"
         terraform output -json > tf_output.json
 
+    - name: Debug repo structure
+      run: ls -R  #list all files  
+
     - name: Save EC2 IP
       id: save_ip
       run: |
