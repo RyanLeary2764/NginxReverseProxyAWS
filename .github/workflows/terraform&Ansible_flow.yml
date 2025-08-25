@@ -81,8 +81,7 @@ jobs:
     # 9️⃣ Run Ansible Playbook using dynamic inventory
     - name: Run Ansible Playbook with dynamic inventory
       run: |
-        ansible-playbook -i ansible/inventory/dynamic_ec2.yml \
-          ansible/playbook.yml \
+        ansible-playbook ansible/playbook.yml \
           --private-key ${{ env.PRIVATE_KEY_PATH }} \
           -u ubuntu
       env:
