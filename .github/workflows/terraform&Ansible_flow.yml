@@ -13,9 +13,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    # 1️⃣ Checkout the repo
     - name: Checkout repository
       uses: actions/checkout@v3
 
+    # 2️⃣ Generate SSH key pair
     - name: Generate SSH key pair
       id: ssh
       run: |
@@ -25,11 +27,13 @@ jobs:
         echo "PRIVATE_KEY_PATH=$HOME/.ssh/id_ed25519" >> $GITHUB_ENV
         echo "PUBLIC_KEY=$(cat ~/.ssh/id_ed25519.pub)" >> $GITHUB_ENV
 
+    # 3️⃣ Setup Terraform
     - name: Setup Terraform
       uses: hashicorp/setup-terraform@v3
       with:
         terraform_version: 1.6.6
 
+    # 4️⃣ Configure AWS credentials
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v2
       with:
@@ -37,6 +41,7 @@ jobs:
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         aws-region: us-east-1 
 
+    # 5️⃣ Terraform init/validate/plan/apply
     - name: Terraform Init
       run: terraform init
       working-directory: Terraform
@@ -46,15 +51,15 @@ jobs:
       working-directory: Terraform
 
     - name: Terraform Plan
-      run: terraform plan -var="public_key=${{env.PUBLIC_KEY}}"
+      run: terraform plan -var="public_key=${{ env.PUBLIC_KEY }}"
       working-directory: Terraform
 
     - name: Terraform Apply
       if: github.ref == 'refs/heads/TestingBranch' && github.event_name == 'push'
-      run: |
-        terraform apply -auto-approve -var="public_key=${{env.PUBLIC_KEY}}"
+      run: terraform apply -auto-approve -var="public_key=${{ env.PUBLIC_KEY }}"
       working-directory: Terraform
 
+    # 6️⃣ Save EC2 IP (optional debug)
     - name: Save EC2 IP
       run: |
         echo "EC2_IP=$(terraform output -raw NginxAWS_server_public_ip)" >> $GITHUB_ENV
@@ -63,18 +68,24 @@ jobs:
     - name: Debug EC2 IP
       run: echo "EC2 IP from Terraform output is $EC2_IP"
 
-    - name: Debug repo structure
-      run: ls -R
+    # 7️⃣ Install Ansible + AWS SDK
+    - name: Install Ansible and AWS SDK
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y ansible python3-boto3 python3-botocore
 
-    - name: Install Ansible
-      run: sudo apt-get update && sudo apt-get install -y ansible
+    # 8️⃣ Optional: debug dynamic inventory
+    - name: Debug dynamic AWS inventory
+      run: ansible-inventory -i ansible/inventory/dynamic_ec2.yml --list
 
-    - name: Run Ansible Playbook
-      uses: dawidd6/action-ansible-playbook@v2
-      with:
-        playbook: ansible/playbook.yml
-        inventory: ansible/inventory/dynamic_ec2.yml
+    # 9️⃣ Run Ansible Playbook using dynamic inventory
+    - name: Run Ansible Playbook with dynamic inventory
+      run: |
+        ansible-playbook -i ansible/inventory/dynamic_ec2.yml \
+          ansible/playbook.yml \
+          --private-key ${{ env.PRIVATE_KEY_PATH }} \
+          -u ubuntu
       env:
         PRIVATE_KEY_PATH: ${{ env.PRIVATE_KEY_PATH }}
         EC2_IP: ${{ env.EC2_IP }}
-        IMAGE_TAG: ${{ env.DOCKER_TAG}}
+        IMAGE_TAG: ${{ env.DOCKER_TAG }}
