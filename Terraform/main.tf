@@ -83,7 +83,8 @@ resource "aws_instance" "NginxAWS_server" {
   instance_type      = var.instance_type
   subnet_id      = aws_subnet.NginxAWS_public_subnet.id   
   key_name =aws_key_pair.ci_key.key_name
-  associate_public_ip_address= false   
+  associate_public_ip_address= false 
+
 
   vpc_security_group_ids = [aws_security_group.NginxAWS_sg.id]
 
@@ -91,6 +92,7 @@ resource "aws_instance" "NginxAWS_server" {
 
   tags = {
     Name = "NginxAWSApp"
+    Environment = "ephemeral"
   }
 }
 
