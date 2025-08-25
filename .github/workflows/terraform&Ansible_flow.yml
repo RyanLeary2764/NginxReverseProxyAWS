@@ -61,8 +61,7 @@ jobs:
       working-directory: Terraform
 
     - name: Debug EC2 IP
-      run: echo "EC2 IP from Terraform output is: $EC2_IP"
-
+      run: echo "EC2 IP from Terraform output is $EC2_IP"
 
     - name: Debug repo structure
       run: ls -R
