@@ -67,6 +67,7 @@ jobs:
       run: |
         IP=$(jq -r '.public_ip.value' tf_output.json)
         echo "EC2_IP=$IP" >> $GITHUB_ENV
+      working-directory: Terraform
 
     - name: Install Ansible
       run: sudo apt-get update && sudo apt-get install -y ansible
