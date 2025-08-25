@@ -69,17 +69,12 @@ jobs:
     - name: Install Ansible
       run: sudo apt-get update && sudo apt-get install -y ansible
 
-    - name: Debug Inventory
-      run: |
-        pwd
-        ls -l inventory.ini
-        cat inventory.ini
-
     - name: Run Ansible Playbook
       uses: dawidd6/action-ansible-playbook@v2
       with:
         playbook: ansible/playbook.yml
-        inventory: ${{ github.workspace }}/inventory.ini
+        inventory: ansible/inventory/dynamic_ec2.yml
       env:
         PRIVATE_KEY_PATH: ${{ env.PRIVATE_KEY_PATH }}
         EC2_IP: ${{ env.EC2_IP }}
+        IMAGE_TAG: ${{ env.DOCKER_TAG}}
