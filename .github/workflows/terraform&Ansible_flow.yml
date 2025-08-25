@@ -71,14 +71,19 @@ jobs:
 
     - name: Generate Inventory 
       run: |
-        echo "[web]" > inventory.ini
+        echo "[ephemeral]" > inventory.ini
         echo "${{ env.EC2_IP }} ansible_user=ubuntu ansible_ssh_private_key_file=${{ env.PRIVATE_KEY_PATH}}" >> inventory.ini
+    - name: Debug Inventory
+      run: |
+        pwd
+        ls -l inventory.ini
+        cat inventory.ini
 
     - name: Run Ansible Playbook
       uses: dawidd6/action-ansible-playbook@v2
       with:
         playbook: ansible/playbook.yml
-        inventory: inventory.ini
+        inventory: ${{ github.workspace }}/inventory.ini
       env:
         PRIVATE_KEY_PATH: ${{ env.PRIVATE_KEY_PATH }}
         EC2_IP: ${{ env.EC2_IP }}
