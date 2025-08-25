@@ -11,7 +11,6 @@ jobs:
   terraform:
     name: Provision Infrastructure
     runs-on: ubuntu-latest
- 
 
     steps:
     - name: Checkout repository
@@ -46,7 +45,6 @@ jobs:
       run: terraform validate
       working-directory: Terraform
 
-
     - name: Terraform Plan
       run: terraform plan -var="public_key=${{env.PUBLIC_KEY}}"
       working-directory: Terraform
@@ -55,38 +53,33 @@ jobs:
       if: github.ref == 'refs/heads/TestingBranch' && github.event_name == 'push'
       run: |
         terraform apply -auto-approve -var="public_key=${{env.PUBLIC_KEY}}"
-        terraform output -json > tf_output.json
       working-directory: Terraform
-      
-
-    - name: Debug repo structure
-      run: ls -R  #list all files  
 
     - name: Save EC2 IP
-      id: save_ip
       run: |
-        IP=$(jq -r '.public_ip.value' tf_output.json)
-        echo "EC2_IP=$IP" >> $GITHUB_ENV
+        echo "EC2_IP=$(terraform output -raw NginxAWS_server_public_ip)" >> $GITHUB_ENV
       working-directory: Terraform
+
+    - name: Debug EC2 IP
+      run: echo "EC2 IP from Terraform output is: $EC2_IP"
+
+
+    - name: Debug repo structure
+      run: ls -R
 
     - name: Install Ansible
       run: sudo apt-get update && sudo apt-get install -y ansible
 
     - name: Generate Inventory 
       run: |
-        echo "[ephemeral]" > inventory.ini
-        echo "$EC2_IP ansible_user=ubuntu ansible_ssh_private_key_file=${{ env.PRIVATE_KEY_PATH}}" >> inventory.ini
+        echo "[web]" > inventory.ini
+        echo "${{ env.EC2_IP }} ansible_user=ubuntu ansible_ssh_private_key_file=${{ env.PRIVATE_KEY_PATH}}" >> inventory.ini
 
     - name: Run Ansible Playbook
       uses: dawidd6/action-ansible-playbook@v2
       with:
         playbook: ansible/playbook.yml
-        inventory: |
-          [web]
-          ${{env.EC2_IP}}
+        inventory: inventory.ini
       env:
-        DOCKER_TAG: ${{ENV.DOCKER_TAG}}
-        PRIVATE_KEY_PATH: ${{env.PRIVATE_KEY_PATH}}
-        EC2_IP: ${{env.EC2_IP}}
-        
-
+        PRIVATE_KEY_PATH: ${{ env.PRIVATE_KEY_PATH }}
+        EC2_IP: ${{ env.EC2_IP }}
