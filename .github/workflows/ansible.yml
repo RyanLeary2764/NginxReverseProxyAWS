@@ -1,0 +1,45 @@
+name: Ansible Deploy
+
+on:
+  workflow_dispatch: # manual trigger
+  push:
+    branches: [ TestingBranch ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v3
+
+    - name: Download EC2 IP artifact
+      uses: actions/download-artifact@v3
+      with:
+        name: ec2-ip
+        path: ./ansible
+
+    - name: Set EC2_IP env variable
+      run: |
+        echo "EC2_IP=$(cat ansible/ec2_ip.txt)" >> $GITHUB_ENV
+
+    - name: Generate SSH key path
+      run: echo "PRIVATE_KEY_PATH=$HOME/.ssh/id_ed25519" >> $GITHUB_ENV
+
+    - name: Install Ansible
+      run: sudo apt-get update && sudo apt-get install -y ansible python3-boto3 python3-botocore
+
+    - name: Run Ansible Playbook
+      run: |
+        ansible-playbook \
+          -i ansible/inventory/dynamic_ec2.yml \
+          ansible/playbook.yml \
+          --private-key ${{ env.PRIVATE_KEY_PATH }} \
+          -u ubuntu
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_REGION: us-east-1
+        PRIVATE_KEY_PATH: ${{ env.PRIVATE_KEY_PATH }}
+        EC2_IP: ${{ env.EC2_IP }}
+        IMAGE_TAG: ${{ env.DOCKER_TAG }}
