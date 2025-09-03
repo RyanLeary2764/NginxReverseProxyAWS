@@ -1,0 +1,24 @@
+variable "vpc_id" {
+  type        = string
+  description = "VPC ID"
+}
+
+variable "igw_id" {
+  type        = string
+  description = "Internet Gateway ID"
+}
+
+variable "subnet_ids" {
+  type        = list(string)
+  description = "List of subnet IDs"
+}
+
+variable "project" {
+  type        = string
+  description = "Project name"
+}
+
+variable "contact" {
+  type        = string
+  description = "Contact name"
+}
