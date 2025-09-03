@@ -32,7 +32,8 @@ provider "ansible" {
 # ───────────────────────────────
 module "vpc_snet" {
   source = "./modules/vpc-snet"
-
+  project = var.project
+  contact = var.contact
 }
 
 # ───────────────────────────────
@@ -44,6 +45,8 @@ module "route_tables" {
   vpc_id     = module.vpc_snet.vpc_id
   subnet_ids = module.vpc_snet.subnet_ids
   igw_id = module.vpc_snet.igw_id
+  project = var.project
+  contact = var.contact
 
 }
 
@@ -59,6 +62,9 @@ module "ec2" {
 
   instance_type = var.instance_type
   public_key    = var.public_key
+
+  project = var.project
+  contact = var.contact
 }
 
 # ───────────────────────────────
