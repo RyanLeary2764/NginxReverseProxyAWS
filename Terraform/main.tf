@@ -63,17 +63,4 @@ module "ec2" {
   contact = var.contact
 }
 
-# ───────────────────────────────
-# Ansible Playbook Execution (optional)
-# ───────────────────────────────
-resource "ansible_playbook" "deploy" {
-  name = "deploy-nginx-ec2"
-  playbook = "./ansible/playbook.yml"
-  
 
-  extra_vars = {
-    ansible_user        = "ec2-user"
-    ansible_host        = module.ec2.public_ip
-    ansible_ssh_private_key_file = "${path.module}/id_rsa"
-  }
-}
