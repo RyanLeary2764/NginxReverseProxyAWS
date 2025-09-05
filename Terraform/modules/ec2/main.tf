@@ -3,7 +3,7 @@ resource "aws_key_pair" "deployer" {
   public_key = var.public_key
 }
 
-resource "aws_instance" "app" {
+resource "aws_instance" "NginxAWS_server" {
   ami                    = "ami-0c55b159cbfafe1f0" # Amazon Linux 2 (us-east-1)
   instance_type          = var.instance_type
   subnet_id              = var.subnet_id
@@ -17,6 +17,6 @@ resource "aws_instance" "app" {
   }
 }
 
-resource "aws_eip" "app" {
-  instance = aws_instance.app.id
+resource "aws_eip" "NginxAWS_eip" {
+  instance = aws_instance.NginxAWS_server.id
 }

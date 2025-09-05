@@ -8,8 +8,8 @@ variable "igw_id" {
   description = "Internet Gateway ID"
 }
 
-variable "subnet_ids" {
-  type        = list(string)
+variable "subnet_id" {
+  type        = string
   description = "List of subnet IDs"
 }
 

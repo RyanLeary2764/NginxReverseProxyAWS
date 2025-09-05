@@ -40,3 +40,6 @@ jobs:
       - name: Terraform Apply
         working-directory: ./Terraform
         run: terraform apply -auto-approve tfplan
+
+      - name: Show Public IP
+        run: terraform -chdir=./Terraform output -raw NginxAWS_server_public_ip

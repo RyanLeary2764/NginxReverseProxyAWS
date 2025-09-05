@@ -11,10 +11,8 @@ terraform {
   }
 
   backend "s3" {
-    bucket         = var.tf_state_bucket
     key            = "terraform.tfstate"
     region         = "us-east-1"
-    dynamodb_table = var.tf_state_lock_table
     encrypt        = true
   }
 }
@@ -23,9 +21,7 @@ provider "aws" {
   region = "us-east-1"
 }
 
-provider "ansible" {
-  inventory_file = "${path.module}/inventory.ini"
-}
+provider "ansible" {}
 
 # ───────────────────────────────
 # VPC + Subnet Module
@@ -43,7 +39,7 @@ module "route_tables" {
   source = "./modules/route-tables"
 
   vpc_id     = module.vpc_snet.vpc_id
-  subnet_ids = module.vpc_snet.subnet_ids
+  subnet_id = module.vpc_snet.public_subnet_id
   igw_id = module.vpc_snet.igw_id
   project = var.project
   contact = var.contact
@@ -71,7 +67,9 @@ module "ec2" {
 # Ansible Playbook Execution (optional)
 # ───────────────────────────────
 resource "ansible_playbook" "deploy" {
-  playbook = "${path.module}/ansible/playbook.yml"
+  name = "deploy-nginx-ec2"
+  playbook = "./ansible/playbook.yml"
+  
 
   extra_vars = {
     ansible_user        = "ec2-user"
