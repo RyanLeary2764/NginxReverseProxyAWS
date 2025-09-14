@@ -4,7 +4,7 @@ resource "aws_key_pair" "deployer" {
 }
 
 resource "aws_instance" "NginxAWS_server" {
-  ami                    = "ami-00ca32bbc84273381" # Amazon Linux 2 (us-east-1)
+  ami                    = var.ami_id # Amazon Linux 2 (us-east-1)
   instance_type          = var.instance_type
   subnet_id              = var.subnet_id
   vpc_security_group_ids = [var.sg_id]

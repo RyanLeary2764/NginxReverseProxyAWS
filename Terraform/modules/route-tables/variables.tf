@@ -3,10 +3,6 @@ variable "vpc_id" {
   description = "VPC ID"
 }
 
-variable "igw_id" {
-  type        = string
-  description = "Internet Gateway ID"
-}
 
 variable "subnet_id" {
   type        = string

@@ -21,7 +21,6 @@ provider "aws" {
   region = "us-east-1"
 }
 
-provider "ansible" {}
 
 # ───────────────────────────────
 # VPC + Subnet Module
@@ -37,10 +36,8 @@ module "vpc_snet" {
 # ───────────────────────────────
 module "route_tables" {
   source = "./modules/route-tables"
-
   vpc_id     = module.vpc_snet.vpc_id
   subnet_id = module.vpc_snet.public_subnet_id
-  igw_id = module.vpc_snet.igw_id
   project = var.project
   contact = var.contact
 
@@ -57,7 +54,7 @@ module "ec2" {
   sg_id     = module.vpc_snet.sg_id
 
   instance_type = var.instance_type
-  public_key    = var.public_key
+  public_key    = file("keys/id_rsa.pub")
 
   project = var.project
   contact = var.contact

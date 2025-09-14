@@ -7,12 +7,6 @@ resource "aws_vpc" "NginxAWS_vpc" {
   }
 }
 
-resource "aws_internet_gateway" "NginxAWS_igw" {
-  vpc_id = aws_vpc.NginxAWS_vpc.id
-  tags = {
-    Name = "NginxAWS-IGW"
-  }
-}
 
 resource "aws_subnet" "NginxAWS_public_subnet" {
   vpc_id                  = aws_vpc.NginxAWS_vpc.id
@@ -26,29 +20,31 @@ resource "aws_subnet" "NginxAWS_public_subnet" {
 
 resource "aws_security_group" "NginxAWS_sg" {
   name        = "NginxAWS_sg"
-  description = "Allow SSH and HTTP"
+  description = "Allow traffic as defined by user"
   vpc_id      = aws_vpc.NginxAWS_vpc.id
 
-  ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+  dynamic "ingress" {
+    for_each = { for k, v in var.security_group_rules : k => v if v.type == "ingress" }
+    content {
+      from_port   = ingress.value.from_port
+      to_port     = ingress.value.to_port
+      protocol    = ingress.value.protocol
+      cidr_blocks = ingress.value.cidr_blocks
+    }
   }
 
-  ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
+  dynamic "egress" {
+    for_each = { for k, v in var.security_group_rules : k => v if v.type == "egress" }
+    content {
+      from_port   = egress.value.from_port
+      to_port     = egress.value.to_port
+      protocol    = egress.value.protocol
+      cidr_blocks = egress.value.cidr_blocks
+    }
   }
 }
+
+
+
 
 

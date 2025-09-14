@@ -32,3 +32,10 @@ variable "contact" {
   type        = string
   description = "Contact name"
 }
+
+variable "ami_id" {
+  description = "AMI ID to use for EC2 instances"
+  type        = string
+  default     = "ami-0c02fb55956c7d316" # Example Amazon Linux 2 AMI in us-east-1
+}
+

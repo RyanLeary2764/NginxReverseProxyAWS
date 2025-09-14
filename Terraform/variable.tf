@@ -1,6 +1,6 @@
 variable "instance_type" {
-    default = "t2.micro"
-    description = "type of ec2 instance"
+  default     = "t2.micro"
+  description = "Type of EC2 instance"
 }
 
 variable "tf_state_bucket" {
@@ -14,16 +14,16 @@ variable "tf_state_lock_table" {
 }
 
 variable "project" {
-  description = "Project name of tagging resources"
+  description = "Project name for tagging resources"
   default     = "recipe-app-api"
 }
 
 variable "contact" {
-  description = "contact name for tagging resources"
+  description = "Contact name/email for tagging resources"
   default     = "73.leary@gmail.com"
 }
 
 variable "public_key" {
-    type = string
-  
+  type        = string
+  description = "SSH public key for EC2 access"
 }
