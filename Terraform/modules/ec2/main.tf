@@ -17,6 +17,4 @@ resource "aws_instance" "NginxAWS_server" {
   }
 }
 
-resource "aws_eip" "NginxAWS_eip" {
-  instance = aws_instance.NginxAWS_server.id
-}
+
