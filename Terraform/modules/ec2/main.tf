@@ -3,7 +3,7 @@ resource "aws_key_pair" "deployer" {
   public_key = var.public_key
 }
 
-resource "aws_instance" "NginxAWS_server" {
+resource "aws_instance" "server" {
   ami                    = var.ami_id # Amazon Linux 2 (us-east-1)
   instance_type          = var.instance_type
   subnet_id              = var.subnet_id

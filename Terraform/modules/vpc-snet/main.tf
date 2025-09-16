@@ -1,4 +1,4 @@
-resource "aws_vpc" "NginxAWS_vpc" {
+resource "aws_vpc" "vpc" {
   cidr_block           = "10.0.0.0/16"
   enable_dns_support   = true
   enable_dns_hostnames = true
@@ -8,8 +8,8 @@ resource "aws_vpc" "NginxAWS_vpc" {
 }
 
 
-resource "aws_subnet" "NginxAWS_public_subnet" {
-  vpc_id                  = aws_vpc.NginxAWS_vpc.id
+resource "aws_subnet" "public_subnet" {
+  vpc_id                  = aws_vpc.vpc.id
   cidr_block              = "10.0.1.0/24"
   availability_zone       = "us-east-1a"
   map_public_ip_on_launch = true
@@ -18,10 +18,17 @@ resource "aws_subnet" "NginxAWS_public_subnet" {
   }
 }
 
-resource "aws_security_group" "NginxAWS_sg" {
+resource "aws_internet_gateway" "igw" {
+  vpc_id = aws_vpc.vpc.id
+  tags = {
+    Name = "NginxAWS-IGW"
+  }
+}
+
+resource "aws_security_group" "sg" {
   name        = "NginxAWS_sg"
   description = "Allow traffic as defined by user"
-  vpc_id      = aws_vpc.NginxAWS_vpc.id
+  vpc_id      = aws_vpc.vpc.id
 
   dynamic "ingress" {
     for_each = { for k, v in var.security_group_rules : k => v if v.type == "ingress" }

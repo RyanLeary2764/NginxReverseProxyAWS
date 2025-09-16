@@ -18,3 +18,8 @@ variable "contact" {
   type        = string
   description = "Contact name"
 }
+
+variable "igw_id" {
+  type        = string
+  description = "Internet Gateway ID"
+}
