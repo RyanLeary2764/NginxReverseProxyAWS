@@ -38,7 +38,7 @@ module "route_tables" {
   source = "./modules/route-tables"
   vpc_id     = module.vpc_snet.vpc_id
   subnet_id = module.vpc_snet.public_subnet_id
-  igw_id = module.vpc.igw_id
+  igw_id = module.vpc_snet.igw_id
   project = var.project
   contact = var.contact
 
