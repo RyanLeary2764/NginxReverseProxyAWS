@@ -1,8 +1,6 @@
 name: Deploy Infra
 
 on:
-  push:
-    branches: [ "Modular_Cicd" ]
   workflow_dispatch:
 
 jobs:
