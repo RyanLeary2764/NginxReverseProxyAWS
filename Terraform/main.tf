@@ -1,116 +1,65 @@
-resource "aws_vpc" "NginxAWS_vpc" {
-  cidr_block           = "10.0.0.0/16"
-  enable_dns_support   = true
-  enable_dns_hostnames = true
-  tags = {
-    Name = "NginxAWS-VPC"
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 5.0"
+    }
+    ansible = {
+      source  = "ansible/ansible"
+      version = "~> 1.0"
+    }
+  }
+
+  backend "s3" {
+    key            = "terraform.tfstate"
+    bucket         = "level-one-bucket"
+    region         = "us-east-1"
+    encrypt        = true
   }
 }
 
-resource "aws_internet_gateway" "NginxAWS_igw" {
-  vpc_id = aws_vpc.NginxAWS_vpc.id
-  tags = {
-    Name = "NginxAWS-IGW"
-  }
-}
-
-resource "aws_subnet" "NginxAWS_public_subnet" {
-  vpc_id                  = aws_vpc.NginxAWS_vpc.id
-  cidr_block              = "10.0.1.0/24"
-  availability_zone       = "us-east-1a"
-  map_public_ip_on_launch = true
-  tags = {
-    Name = "NginxAWS-Public-Subnet"
-  }
-}
-
-resource "aws_route_table" "NginxAWS_public_rt" {
-  vpc_id = aws_vpc.NginxAWS_vpc.id
-  route {
-    cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.NginxAWS_igw.id
-  }
-  tags = {
-    Name = "NginxAWS-Public-RT"
-  }
+provider "aws" {
+  region = "us-east-1"
 }
 
 
-resource "aws_route_table_association" "NginxAWS_public_rta" {
-  subnet_id      = aws_subnet.NginxAWS_public_subnet.id
-  route_table_id = aws_route_table.NginxAWS_public_rt.id
+# ───────────────────────────────
+# VPC + Subnet Module
+# ───────────────────────────────
+module "vpc_snet" {
+  source = "./modules/vpc-snet"
+  project = var.project
+  contact = var.contact
 }
 
-resource "aws_security_group" "NginxAWS_sg" {
-  name        = "NginxAWS-sg"
-  description = "Security group for Nginx application"
-  vpc_id      = aws_vpc.NginxAWS_vpc.id
-  ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
+# ───────────────────────────────
+# Route Tables Module
+# ───────────────────────────────
+module "route_tables" {
+  source = "./modules/route-tables"
+  vpc_id     = module.vpc_snet.vpc_id
+  subnet_id = module.vpc_snet.public_subnet_id
+  igw_id = module.vpc_snet.igw_id
+  project = var.project
+  contact = var.contact
 
-  ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    from_port   = 8000
-    to_port     = 8000
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  egress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  tags = {
-    Name = "NginxAWS-SG"
-  }
 }
 
-resource "aws_instance" "NginxAWS_server" {
-  ami      ="ami-07d9b9ddc6cd8dd30"
-  instance_type      = var.instance_type
-  subnet_id      = aws_subnet.NginxAWS_public_subnet.id   
-  key_name =aws_key_pair.ci_key.key_name
-  associate_public_ip_address= false 
+# ───────────────────────────────
+# EC2 Module
+# ───────────────────────────────
+module "ec2" {
+  source = "./modules/ec2"
 
+  subnet_id = module.vpc_snet.public_subnet_id
+  vpc_id    = module.vpc_snet.vpc_id
+  sg_id     = module.vpc_snet.sg_id
 
-  vpc_security_group_ids = [aws_security_group.NginxAWS_sg.id]
+  instance_type = var.instance_type
+  public_key    = file("keys/id_rsa.pub")
 
- 
-
-  tags = {
-    Name = "NginxAWSApp"
-    Environment = "ephemeral"
-  }
+  project = var.project
+  contact = var.contact
 }
 
 
-
-resource "aws_eip" "NginxAWS_eip" {
-  domain      = "vpc"
-}
-
-resource "aws_key_pair" "ci_key" {
-
-key_name = "ci-cd-key-${timestamp()}"
-public_key = var.public_key
-  
-}
-
-resource "aws_eip_association" "NginxAWS_eip_assoc" {
-  instance_id = aws_instance.NginxAWS_server.id
-  allocation_id = aws_eip.NginxAWS_eip.id
-
-}
