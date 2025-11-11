@@ -1,0 +1,31 @@
+---
+- name: Ensure Docker is installed
+  ansible.builtin.package:
+    name: docker
+    state: present
+
+- name: Start Docker service
+  ansible.builtin.service:
+    name: docker
+    state: started
+    enabled: yes
+
+- name: Pull application image
+  community.docker.docker_image:
+    name: your-dockerhub-username/your-image
+    tag: "{{ image_tag }}"
+    source: pull
+
+- name: Stop existing container (if running)
+  community.docker.docker_container:
+    name: my_app
+    state: absent
+
+- name: Run new container
+  community.docker.docker_container:
+    name: my_app
+    image: "your-dockerhub-username/your-image:{{ image_tag }}"
+    state: started
+    restart_policy: always
+    published_ports:
+      - "80:80"

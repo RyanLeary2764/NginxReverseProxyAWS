@@ -1,0 +1,25 @@
+# ansible/inventory/dynamic_ec2.yml
+plugin: aws_ec2
+
+# AWS region to query
+regions:
+  - us-east-1
+
+# Use the public IP of the instance for SSH connections
+hostnames:
+  - public-ip-address
+
+# Filters to select only your ephemeral EC2
+filters:
+  "tag:Environment": ephemeral       # Must match the Terraform tag
+  instance-state-name: running
+
+# Optional: group the hosts by tag Name if you want
+keyed_groups:
+  - key: tags.Name
+    prefix: name
+
+# Optional: set defaults for ansible_user and SSH key (can override in workflow)
+compose:
+  ansible_user: ubuntu
+  ansible_ssh_private_key_file: "{{ lookup('env', 'PRIVATE_KEY_PATH') }}"
