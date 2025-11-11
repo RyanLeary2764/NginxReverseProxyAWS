@@ -27,3 +27,26 @@ variable "public_key" {
   type        = string
   description = "SSH public key for EC2 access"
 }
+
+variable "vpc_cidr" {
+  description = "CIDR block for the VPC"
+  type        = string
+  validation {
+    condition     = can(cidrhost(var.vpc_cidr_block, 0))
+    error_message = "Must be a valid CIDR block."
+  }
+}
+
+variable "public_subnet_cidr" {
+  description = "CIDR block for the subnet"
+  type        = string
+  validation {
+    condition     = can(cidrhost(var.subnet_cidr_block, 0))
+    error_message = "Must be a valid CIDR block."
+  }
+}
+
+variable "availability_zone" {
+  description = "AWS availability zone for subnet and EC2"
+  type        = string
+}
